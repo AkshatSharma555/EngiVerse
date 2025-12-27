@@ -21,15 +21,15 @@ const SavedJobs = () => {
     // Fetch Saved Jobs
     useEffect(() => {
         const fetchSavedJobs = async () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                setLoading(false);
-                return;
-            }
+            // LocalStorage fallback bhi rakha hai, but main kaam Cookie karegi
+            const token = localStorage.getItem('token'); 
             
             try {
+                // 🔥 FIX: Added 'withCredentials: true'
+                // Iske bina Vercel se Render tak Cookie nahi jayegi
                 const response = await axios.get(`${backendUrl}/api/saved-jobs`, {
-                    headers: { token: token } 
+                    headers: { token: token },
+                    withCredentials: true 
                 });
 
                 if (response.data.success) {
@@ -37,7 +37,8 @@ const SavedJobs = () => {
                 }
             } catch (error) {
                 console.error(error);
-                toast.error("Failed to load saved jobs.");
+                // Silent fail rakhte hain taaki user panic na kare agar empty ho
+                // toast.error("Failed to load saved jobs."); 
             } finally {
                 setLoading(false);
             }
@@ -59,9 +60,14 @@ const SavedJobs = () => {
 
         try {
             const token = localStorage.getItem('token');
+            
+            // 🔥 FIX: Added 'withCredentials: true' here too
             const { data } = await axios.post(`${backendUrl}/api/saved-jobs/remove`, 
                 { jobId: jobToDelete },
-                { headers: { token } }
+                { 
+                    headers: { token },
+                    withCredentials: true 
+                }
             );
 
             if (data.success) {
@@ -121,17 +127,15 @@ const SavedJobs = () => {
                                 <JobCard job={job} />
                                 
                                 {/* 🔥 CUSTOM DELETE ICON OVERLAY */}
-                                {/* Yeh button card ke original save button ke upar aa jayega */}
                                 <button 
                                     onClick={(e) => {
                                         e.preventDefault(); 
-                                        e.stopPropagation(); // Stop click from opening job details
+                                        e.stopPropagation(); 
                                         confirmUnsave(job._id);
                                     }}
                                     className="absolute top-5 right-5 p-2.5 bg-white border border-red-100 text-red-500 rounded-full shadow-md z-20 opacity-100 hover:bg-red-50 hover:scale-110 hover:shadow-lg transition-all duration-200 group-hover:opacity-100"
                                     title="Remove Job"
                                 >
-                                    {/* Using Trash2 Icon specifically */}
                                     <Trash2 className="w-5 h-5 fill-none stroke-red-500 stroke-2" />
                                 </button>
                             </div>
