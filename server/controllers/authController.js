@@ -7,6 +7,7 @@ import {
   PASSWORD_RESET_TEMPLATE,
 } from "../config/emailTemplate.js";
 
+// --- REGISTER CONTROLLER ---
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password) {
@@ -20,18 +21,22 @@ export const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new userModel({ name, email, password: hashedPassword });
     await user.save();
+    
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+    // 🔥 FIXED: Cookie Settings for Cross-Site (Vercel -> Render)
     const cookieOptions = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", 
+        secure: true, // Hamesha true rakho Render (HTTPS) ke liye
+        sameSite: 'none', // Cross-origin requests ke liye zaroori hai
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     };
 
     res.cookie("token", token, cookieOptions);
 
     const mailOptions = { from: process.env.SENDER_EMAIL, to: email, subject: "Welcome to EngiVerse!", text: `Welcome aboard! Your account has been created with email id: ${email}` };
-    await transporter.sendMail(mailOptions); // Async but don't block response if fails
+    await transporter.sendMail(mailOptions); 
+
     const userData = await userModel.findById(user._id).select("-password");
     return res.status(201).json({ success: true, message: "User registered successfully", user: userData });
   } catch (error) {
@@ -40,34 +45,31 @@ export const register = async (req, res) => {
   }
 };
 
+// --- LOGIN CONTROLLER ---
 export const login = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ success: false, message: "Email and password are required" });
   }
   try {
-    // --- UPDATED LOGIC HERE ---
-    // Pehle sirf user dhundo without password check
     const user = await userModel.findOne({ email }).select('+password');
     
-    // Agar user nahi mila, toh 404 return karo (Specific Error Code for Frontend)
     if (!user) {
       return res.status(404).json({ success: false, message: "Account does not exist", code: "USER_NOT_FOUND" });
     }
 
-    // Ab password check karo
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: "Invalid password" });
     }
 
-    // Login Success
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
+    // 🔥 FIXED: Cookie Settings for Cross-Site (Vercel -> Render)
     const cookieOptions = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", 
+        secure: true, // Render (HTTPS) ke liye mandatory
+        sameSite: 'none', // Vercel se Render connect karne ke liye mandatory
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     };
 
@@ -81,13 +83,16 @@ export const login = async (req, res) => {
   }
 };
 
+// --- LOGOUT CONTROLLER ---
 export const logout = async (req, res) => {
   try {
+    // 🔥 FIXED: Cookie clear karne ke liye bhi same options chahiye hote hain
     const cookieOptions = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: true, 
+        sameSite: 'none',
     };
+    
     res.clearCookie("token", cookieOptions);
     return res.status(200).json({ success: true, message: "Logged out successfully" });
   } catch (error) {
@@ -96,6 +101,7 @@ export const logout = async (req, res) => {
   }
 };
 
+// --- VERIFY OTP ---
 export const sendVerifyOtp = async (req, res) => {
   try {
     const user = await userModel.findById(req.user.id);
@@ -107,7 +113,7 @@ export const sendVerifyOtp = async (req, res) => {
     }
     const otp = String(Math.floor(100000 + Math.random() * 900000));
     user.verifyOtp = otp;
-    user.verifyOtpExpireAt = Date.now() + 15 * 60 * 1000; // OTP valid for 15 minutes
+    user.verifyOtpExpireAt = Date.now() + 15 * 60 * 1000; 
     await user.save();
     const mailOption = { from: process.env.SENDER_EMAIL, to: user.email, subject: "Account Verification OTP", html: EMAIL_VERIFY_TEMPLATE.replace("{{otp}}", otp).replace("{{email}}", user.email) };
     await transporter.sendMail(mailOption);
@@ -145,6 +151,7 @@ export const verifyEmail = async (req, res) => {
   }
 };
 
+// --- IS AUTHENTICATED ---
 export const isAuthenticated = async (req, res) => {
   try {
     const user = await userModel.findById(req.user.id).select("-password");
@@ -156,6 +163,7 @@ export const isAuthenticated = async (req, res) => {
   }
 };
 
+// --- PASSWORD RESET ---
 export const sendResetOtp = async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ success: false, message: "Email is required" });
