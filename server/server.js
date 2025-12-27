@@ -3,9 +3,6 @@ import cors from "cors";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/mongodb.js";
-
-// --- IMPORT APP & SERVER FROM SOCKET.JS ---
-// Note: We don't create 'app' here anymore, we import it.
 import { app, server, io } from "./socket/socket.js";
 
 // Models
@@ -30,22 +27,25 @@ import marketplaceRouter from './routes/marketplaceRoutes.js';
 const port = process.env.PORT || 4000;
 connectDB();
 
-const allowedOrigins = ["http://localhost:5173", "http://localhost:5174", "https://engiverse-chi.vercel.app"];
-
 // Make io accessible to controllers via req.app.get('io')
 app.set("io", io);
 
 // Middlewares
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+
+
+app.use(cors({ 
+    origin: true, 
+    credentials: true 
+}));
 
 // API Endpoints
 app.get("/", (req, res) => res.send("API Working"));
 
 app.use("/api/auth", authRouter);
-app.use("/api/user", userRouter); // Single user operations
-app.use("/api/users", userRouter); // Collection operations (Explore etc.)
+app.use("/api/user", userRouter); 
+app.use("/api/users", userRouter); 
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/profile", profileRouter);
 app.use("/api/jobs", jobRouter);
