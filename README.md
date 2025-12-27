@@ -1,5 +1,5 @@
 <div align="center">
-<a href="https://github.com/AkshatSharma555/EngiVerse-App">
+<a href="https://github.com/AkshatSharma555/EngiVerse">
 <img src="./assets/logo.png" alt="EngiVerse Logo" width="350">
 </a>
 
@@ -9,7 +9,7 @@ The first ecosystem where engineers don't just learn—they build, earn, and get
 </p>
 
 <p align="center">
-<a href="https://engiverse-chi.vercel.app/">
+<a href="https://engiverse-ten.vercel.app/">
 <img src="https://img.shields.io/badge/🚀_Launch-Live_App-2ea44f?style=for-the-badge&logoColor=white" height="35" />
 </a>
 &nbsp;&nbsp;
@@ -17,9 +17,6 @@ The first ecosystem where engineers don't just learn—they build, earn, and get
 <img src="https://img.shields.io/badge/🎥_Watch-Demo_Video-FF0000?style=for-the-badge&logo=youtube&logoColor=white" height="35" />
 </a>
 &nbsp;&nbsp;
-<a href="#-installation--setup">
-<img src="https://img.shields.io/badge/📂_Installation-Guide-2563EB?style=for-the-badge&logoColor=white" height="35" />
-</a>
 </p>
 </div>
 
@@ -419,11 +416,11 @@ Use your hard-earned coins to unlock premium notes and project templates. Featur
 <p style="color: #555;">Open your terminal and run the following commands:</p>
 
 ```
-git clone https://github.com/AkshatSharma555/EngiVerse-App.git
+git clone https://github.com/AkshatSharma555/EngiVerse.git
 ```
 Navigate to the directory
 ```
-cd EngiVerse-App
+cd EngiVerse
 ```
 <br />
 
@@ -434,7 +431,7 @@ cd server
 ```
 Install Dependencies
 ```
-npm install
+npm install --legacy-peer-deps
 ```
 🔑 Configuring Backend Environment Variables
 Create a file named .env in the server directory. Copy the structure below and fill in your credentials.
@@ -489,7 +486,7 @@ SMTP_PASS=your_google_app_password
 ```
 Start the Backend Server:
 ```
-npm start
+npm run server
 ```
 Terminal should say: MongoDB Connected & Server running on port 5000
 
@@ -564,7 +561,7 @@ npm run dev
     If you found this project helpful or inspiring, please give it a star! 🌟
   </p>
 
-  <a href="https://github.com/AkshatSharma555/EngiVerse-App/stargazers">
+  <a href="https://github.com/AkshatSharma555/EngiVerse/stargazers">
     <img src="https://img.shields.io/badge/⭐_Star_This_Repository-FFD700?style=for-the-badge&logo=github&logoColor=black&labelColor=FFFacd" height="45" alt="Star Repo" />
   </a>
 </div>
