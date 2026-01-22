@@ -59,7 +59,7 @@ app.use(cors({
 }));
 
 // API Endpoints
-app.get("/", (req, res) => res.send("EngiVerse API Working on Port 5001 🚀"));
+app.get("/", (req, res) => res.send("EngiVerse API Working on Port 5001"));
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter); 
