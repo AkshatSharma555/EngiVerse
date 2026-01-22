@@ -2,10 +2,12 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";           // Security
+import compression from "compression"; // Speed
 import connectDB from "./config/mongodb.js";
 import { app, server, io } from "./socket/socket.js";
 
-// Models
+// Models Import
 import "./models/userModel.js";
 
 // Route Imports
@@ -24,24 +26,41 @@ import interviewRoutes from './routes/interviewRoutes.js';
 import resumeRouter from './routes/resumeRoutes.js';
 import marketplaceRouter from './routes/marketplaceRoutes.js';
 
-const port = process.env.PORT || 4000;
+// 👇 IMPORTANT: Port 5001 fix kiya hai (WordAutomate 5000 par hai)
+const port = process.env.PORT || 5001; 
+
 connectDB();
 
-// Make io accessible to controllers via req.app.get('io')
+// Make io accessible
 app.set("io", io);
 
-// Middlewares
+// 👇 Best Practices Middleware (Security & Speed)
+app.use(helmet()); 
+app.use(compression());
 app.use(express.json());
 app.use(cookieParser());
 
+// 👇 Allowed Origins (Localhost + Tera Vercel App)
+// Jab tu Vercel deploy karega tab uska link yaha add karna padega
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://engiverse.vercel.app", 
+    "https://engiverse-study.web.app"
+];
 
 app.use(cors({ 
-    origin: true, 
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true 
 }));
 
 // API Endpoints
-app.get("/", (req, res) => res.send("API Working"));
+app.get("/", (req, res) => res.send("EngiVerse API Working on Port 5001 🚀"));
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter); 
@@ -59,7 +78,7 @@ app.use('/api/interviews', interviewRoutes);
 app.use('/api/resume', resumeRouter);
 app.use('/api/marketplace', marketplaceRouter);
 
-// Start Server (Using 'server' from socket.js, not 'app.listen')
+// Start Server
 server.listen(port, () =>
-  console.log(`Server (with Socket.IO) started on PORT:${port}`)
+  console.log(`EngiVerse Server started on PORT:${port}`)
 );
